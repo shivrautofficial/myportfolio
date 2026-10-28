@@ -21,6 +21,8 @@ import {
   MoveUpRight,
   ShieldCheck,
   Sparkles,
+  Sun,
+  Moon,
   X,
 } from 'lucide-react';
 import {
@@ -45,6 +47,7 @@ const projectFilters: Array<'All' | ProjectCategory> = [
   'All',
   ...new Set(projects.map((project) => project.category)),
 ];
+type Theme = 'light' | 'dark';
 
 function useScrollReveal(refreshKey: unknown) {
   useEffect(() => {
@@ -71,7 +74,7 @@ function useScrollReveal(refreshKey: unknown) {
   }, [refreshKey]);
 }
 
-function Header() {
+function Header({ theme, onThemeToggle }: { theme: Theme; onThemeToggle: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -109,6 +112,16 @@ function Header() {
           <a className="nav-contact" href="#contact" onClick={closeMenu}>
             Let&apos;s talk <ArrowUpRight size={15} />
           </a>
+          <button
+            type="button"
+            className="theme-toggle"
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            aria-pressed={theme === 'dark'}
+            onClick={onThemeToggle}
+          >
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+          </button>
         </nav>
       </div>
     </header>
@@ -309,7 +322,26 @@ function CredentialList({
 
 function App() {
   const [filter, setFilter] = useState<'All' | ProjectCategory>('All');
+  const [theme, setTheme] = useState<Theme>(
+    () => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light',
+  );
   useScrollReveal(filter);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+      ?.setAttribute('content', theme === 'dark' ? '#0b1220' : '#f7f9fc');
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    try {
+      window.localStorage.setItem('portfolio-theme', nextTheme);
+    } catch (error) {
+      console.warn('Could not save the selected theme preference.', error);
+    }
+    setTheme(nextTheme);
+  };
   const visibleProjects = useMemo(
     () => filter === 'All' ? projects : projects.filter((project) => project.category === filter),
     [filter],
@@ -318,7 +350,7 @@ function App() {
   return (
     <>
       <a className="skip-link" href="#main">Skip to content</a>
-      <Header />
+      <Header theme={theme} onThemeToggle={toggleTheme} />
       <main id="main">
         <section id="home" className="hero-section">
           <div className="hero-grid-bg" aria-hidden="true" />

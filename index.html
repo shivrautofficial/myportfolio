@@ -4,6 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f7f9fc" />
+    <script>
+      try {
+        const savedTheme = localStorage.getItem('portfolio-theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme === 'dark' || savedTheme === 'light'
+          ? savedTheme
+          : prefersDark ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+        document.querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', theme === 'dark' ? '#0b1220' : '#f7f9fc');
+      } catch (error) {
+        console.warn('Could not read the saved theme preference.', error);
+      }
+    </script>
     <meta name="description" content="Shiv Raut is a first-year Computer Science (AI/ML) student exploring AI, robotics, cybersecurity, and software. View projects, education, and ways to connect." />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Shiv Raut — Engineering Student | AI, Robotics & Software" />
